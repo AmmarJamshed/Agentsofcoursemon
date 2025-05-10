@@ -2,34 +2,34 @@ import openai
 import requests
 import os
 
+print("✅ Starting LinkedIn auto-post script...")
+
 openai.api_key = os.getenv("OPENAI_API_KEY")
 access_token = os.getenv("LINKEDIN_ACCESS_TOKEN")
 user_id = os.getenv("LINKEDIN_USER_ID")
 
-# Step 1: Generate a post
 def generate_post():
+    print("🧠 Generating post using OpenAI...")
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[{"role": "user", "content": "Write a professional post about how AI is transforming education"}]
     )
     return response['choices'][0]['message']['content']
 
-# Step 2: Post to LinkedIn
 def post_to_linkedin(content):
+    print("📤 Sending post to LinkedIn...")
     url = "https://api.linkedin.com/v2/ugcPosts"
     headers = {
         "Authorization": f"Bearer {access_token}",
         "X-Restli-Protocol-Version": "2.0.0",
         "Content-Type": "application/json"
     }
-    post_data = {
+    data = {
         "author": f"urn:li:person:{user_id}",
         "lifecycleState": "PUBLISHED",
         "specificContent": {
             "com.linkedin.ugc.ShareContent": {
-                "shareCommentary": {
-                    "text": content
-                },
+                "shareCommentary": {"text": content},
                 "shareMediaCategory": "NONE"
             }
         },
@@ -37,8 +37,10 @@ def post_to_linkedin(content):
             "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
         }
     }
-    response = requests.post(url, headers=headers, json=post_data)
-    print(response.status_code, response.text)
+    res = requests.post(url, headers=headers, json=data)
+    print("📊 Response:", res.status_code, res.text)
 
 # Run it
-post_to_linkedin(generate_post())
+post_text = generate_post()
+print("📝 Generated Post:\n", post_text)
+post_to_linkedin(post_text)
