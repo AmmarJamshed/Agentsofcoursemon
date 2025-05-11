@@ -1,6 +1,8 @@
 import openai
 import requests
 import os
+from openai import OpenAI
+import os
 
 print("✅ Starting LinkedIn auto-post script...")
 
@@ -8,13 +10,18 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 access_token = os.getenv("LINKEDIN_ACCESS_TOKEN")
 user_id = os.getenv("LINKEDIN_USER_ID")
 
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
 def generate_post():
-    print("🧠 Generating post using OpenAI...")
-    response = openai.ChatCompletion.create(
+    print("🧠 Generating post using OpenAI v1.0+...")
+    response = client.chat.completions.create(
         model="gpt-4",
-        messages=[{"role": "user", "content": "Write a professional post about how AI is transforming education"}]
+        messages=[
+            {"role": "user", "content": "Write a professional post about how AI is transforming education"}
+        ]
     )
-    return response['choices'][0]['message']['content']
+    return response.choices[0].message.content
+
 
 def post_to_linkedin(content):
     print("📤 Sending post to LinkedIn...")
